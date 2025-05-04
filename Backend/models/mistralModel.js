@@ -1,8 +1,22 @@
+/**
+ * Mistral AI Model Integration
+ * This file handles the integration with Mistral AI for text tone adjustment.
+ * It provides functions to interact with the Mistral AI API for text transformation.
+ */
 const fetch = require('node-fetch');
 
+/**
+ * Mistral API key
+ * Mistral API url
+ */
 const apiKey = process.env.MISTRAL_API_KEY;
 const apiUrl = 'https://api.mistral.ai/v1/chat/completions';
 
+/**
+ * Get tone prompt based on tone level
+ * @param {number} toneLevel - Tone level (0-100)
+ * @returns {string} Tone prompt
+ */
 const getTonePrompt = (toneLevel) => {
     if (toneLevel < 25) {
         return 'very formal and professional';
@@ -15,6 +29,11 @@ const getTonePrompt = (toneLevel) => {
     }
 };
 
+/**
+ * Get style prompt based on style level
+ * @param {number} styleLevel - Style level (0-100)
+ * @returns {string} Style prompt
+ */
 const getStylePrompt = (styleLevel) => {
     if (styleLevel < 25) {
         return 'very concise and to the point';
@@ -27,6 +46,13 @@ const getStylePrompt = (styleLevel) => {
     }
 };
 
+/**
+ * Adjust text tone using Mistral AI
+ * @param {string} text - The input text to be adjusted
+ * @param {number} toneLevel - Tone level (0-100)
+ * @param {number} styleLevel - Style level (0-100)
+ * @returns {Promise<string>} The adjusted text
+ */
 const adjustTone = async (text, toneLevel, styleLevel) => {
     try {
         const tonePrompt = getTonePrompt(toneLevel);

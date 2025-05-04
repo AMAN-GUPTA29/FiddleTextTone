@@ -1,12 +1,29 @@
+/**
+ * Controller for handling tone adjustment operations
+ * This file contains the business logic for text tone manipulation
+ */
 const { adjustTone } = require('../models/mistralModel');
 const { redisUtil, redisUtilGet } = require('../utils/redis');
 
-const adjustToneHandler = async (req, res) => {
+/**
+ * Handle tone adjustment request
+ * @param {Request} req - Express request object
+ * @param {Response} res - Express response object
+ * @param {NextFunction} next - Express next function
+ */
+const adjustToneHandler = async (req, res, next) => {
     try {
         const { text, toneLevel, styleLevel } = req.body;
         
-        if (!text || toneLevel === undefined || styleLevel === undefined) {
-            return res.status(400).json({ error: 'Text, tone level, and style level are required' });
+        /**
+         * Validate request parameters
+         */
+        if (!text || typeof text !== 'string') {
+            return res.status(400).json({ error: 'Invalid text input' });
+        }
+
+        if (toneLevel === undefined || styleLevel === undefined) {
+            return res.status(400).json({ error: 'Missing tone or style level' });
         }
 
         // Validate ranges
@@ -23,17 +40,29 @@ const adjustToneHandler = async (req, res) => {
             return res.json({ adjustedText: cachedResponse });
         }
 
-        // If not in cache, get tone and style adjusted text from Mistral AI
+        /**
+         * Process the text adjustment
+         */
         const adjustedText = await adjustTone(text, toneLevel, styleLevel);
         
         // Cache the response
         await redisUtil(cacheKey, adjustedText);
         
-        res.json({ adjustedText });
+        /**
+         * Return the adjusted text
+         */
+        res.json({
+            adjustedText,
+            originalText: text,
+            toneLevel,
+            styleLevel
+        });
     } catch (error) {
-        console.error('Error adjusting tone:', error);
-        res.status(500).json({ error: 'Failed to adjust tone and style' });
+        console.error('Error in tone adjustment:', error);
+        next(error);
     }
 };
 
-module.exports = { adjustToneHandler }; 
+module.exports = {
+    adjustTone: adjustToneHandler
+}; 

@@ -1,7 +1,25 @@
+/**
+ * Main application component for the Tone Slider Text Tool.
+ * This component provides a text editor with a 2D tone slider interface
+ * that allows users to adjust the tone and style of their text in real-time.
+ */
 import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 function App() {
+  /**
+   * State management for the application
+   * @type {Object}
+   * @property {string} text - Current text content
+   * @property {string} originalText - Original text before any modifications
+   * @property {Object} sliderPosition - Current position of the 2D slider {x, y}
+   * @property {Array} history - Array of text states for undo/redo
+   * @property {number} historyIndex - Current position in the history array
+   * @property {string} error - Error message if any
+   * @property {boolean} isLoading - Loading state indicator
+   * @property {boolean} isDragging - Slider drag state
+   * @property {string} previewText - Preview text during slider movement
+   */
   const [text, setText] = useState('');
   const [originalText, setOriginalText] = useState('');
   const [sliderPosition, setSliderPosition] = useState({ x: 0.5, y: 0.5 });
@@ -12,21 +30,36 @@ function App() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewText, setPreviewText] = useState('');
 
+  /**
+   * Initialize dark mode on component mount
+   */
   useEffect(() => {
     document.documentElement.classList.add('dark');
   }, []);
 
+  /**
+   * Handle text input changes
+   * @param {Event} e - Input event
+   */
   const handleTextChange = (e) => {
     const newText = e.target.value;
     setText(newText);
     addToHistory(newText);
   };
 
+  /**
+   * Handle slider position changes
+   * @param {Object} position - New slider position {x, y}
+   */
   const handleSliderChange = async (position) => {
     setSliderPosition(position);
     await analyzeTone(position);
   };
 
+  /**
+   * Add new text state to history
+   * @param {string} newText - Text to add to history
+   */
   const addToHistory = (newText) => {
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(newText);
@@ -34,6 +67,9 @@ function App() {
     setHistoryIndex(newHistory.length - 1);
   };
 
+  /**
+   * Handle undo operation
+   */
   const handleUndo = () => {
     if (historyIndex > 0) {
       const newIndex = historyIndex - 1;
@@ -42,6 +78,9 @@ function App() {
     }
   };
 
+  /**
+   * Handle redo operation
+   */
   const handleRedo = () => {
     if (historyIndex < history.length - 1) {
       const newIndex = historyIndex + 1;
@@ -50,6 +89,9 @@ function App() {
     }
   };
 
+  /**
+   * Reset text and slider to initial state
+   */
   const handleReset = () => {
     setText(originalText);
     setSliderPosition({ x: 0.5, y: 0.5 });
@@ -58,6 +100,10 @@ function App() {
     setError('');
   };
 
+  /**
+   * Analyze and adjust text tone based on slider position
+   * @param {Object} position - Current slider position {x, y}
+   */
   const analyzeTone = async (position) => {
     if (!text.trim()) return;
     
@@ -100,12 +146,20 @@ function App() {
     }
   };
 
+  /**
+   * Handle mouse down event on slider
+   * @param {Event} e - Mouse event
+   */
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
     updateSliderPosition(e);
   }, []);
 
+  /**
+   * Handle mouse move event on slider
+   * @param {Event} e - Mouse event
+   */
   const handleMouseMove = useCallback((e) => {
     if (!isDragging) return;
     e.preventDefault();
@@ -120,6 +174,9 @@ function App() {
     setPreviewText(`Adjusting to ${toneLevel}% tone, ${styleLevel}% style...`);
   }, [isDragging]);
 
+  /**
+   * Handle mouse up event on slider
+   */
   const handleMouseUp = useCallback(() => {
     if (isDragging) {
       setIsDragging(false);
@@ -127,6 +184,10 @@ function App() {
     }
   }, [isDragging, sliderPosition]);
 
+  /**
+   * Update slider position based on mouse coordinates
+   * @param {Event} e - Mouse event
+   */
   const updateSliderPosition = (e) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const x = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
@@ -134,6 +195,9 @@ function App() {
     setSliderPosition({ x, y });
   };
 
+  /**
+   * Set up global mouse event listeners for slider dragging
+   */
   useEffect(() => {
     const handleGlobalMouseMove = (e) => {
       if (!isDragging) return;
@@ -159,6 +223,9 @@ function App() {
     };
   }, [isDragging, handleMouseUp]);
 
+  /**
+   * Render the application UI
+   */
   return (
     <div className="min-h-screen bg-dark-900 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -1,5 +1,3 @@
-
-
 - Interactive 2D slider for tone and style adjustment
 - Real-time text processing
 - Visual feedback during processing
@@ -55,11 +53,7 @@ FiddleTextTone/
    npm install
    ```
 
-3. Create a `.env` file in the Backend directory:
-   ```env
-   PORT=8000
-   REDIS_URL=your_redis_url
-   ```
+3. `.env` file is already included in backend no need to create new
 
 4. For development with hot reloading:
    ```bash
